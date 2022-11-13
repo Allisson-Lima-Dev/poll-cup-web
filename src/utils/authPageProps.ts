@@ -9,7 +9,7 @@ import { authOptions } from "~/pages/api/auth/[...nextauth]";
 export async function authPageProps({ Component, ctx }: any) {
   let pageProps = {};
   const api = getAPIClient();
-  const FREE_ROUTES = ["/login"];
+  const FREE_ROUTES = ["/login", "/teste"];
   const {
     "@PollCupAccess_token": token,
     "next-auth.session-token": authToken,
@@ -17,22 +17,17 @@ export async function authPageProps({ Component, ctx }: any) {
 
   const session = await getSession(ctx);
 
-  const userAuth = {
-    client_id: process.env.NEXT_PUBLIC_CLIENT_ID,
-    client_secret: process.env.NEXT_PUBLIC_CLIENT_SECRET,
-    grant_type: process.env.NEXT_PUBLIC_GRANT_TYPE,
-  };
   if (Component.getInitialProps) {
     pageProps = await Component.getInitialProps(ctx);
   }
 
   if (FREE_ROUTES.includes(ctx.pathname)) return { pageProps };
 
-  if (!token || !session) {
+  if (!session?.accessToken) {
     redirectTo("/login", { res: ctx.res, status: 301 });
     return {};
   }
-  if (token || session) {
+  if (session.accessToken) {
     return { pageProps };
   }
 

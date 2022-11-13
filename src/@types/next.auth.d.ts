@@ -14,6 +14,14 @@ declare module "next-auth" {
     accessToken: string | unknown;
   }
 
+  interface User {
+    access_token: string | unknown;
+  }
+
+  interface Account {
+    access_token: string | unknown;
+  }
+
   interface token {
     expiresIn: string | unknown;
     id: string;

@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useSession, signIn } from "next-auth/react";
 import Router from "next/router";
-import { setCookie } from "nookies";
+import { destroyCookie, setCookie } from "nookies";
 import {
   createContext,
   useState,
@@ -62,7 +62,9 @@ export function AuthContextProvider({ children }: Component) {
   }
 
   async function signInWithGoogle() {
-    signIn("google");
+    signIn("google", {
+      callbackUrl: "http://localhost:3000/home",
+    });
   }
 
   async function signInCredentials() {
@@ -82,6 +84,8 @@ export function AuthContextProvider({ children }: Component) {
       SignInUser();
       return;
     }
+    status === "unauthenticated" &&
+      destroyCookie(null, "@PollCupAccess_token", { path: "/" });
   }, [status]);
 
   return (
