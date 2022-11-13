@@ -11,7 +11,7 @@ export default function Home() {
   async function handleLogin() {
     signIn("google");
   }
-  console.log(session?.accessToken, status);
+  console.log(session, status);
 
   const [userInfo, setUserInfo] = useState({ email: "", password: "" });
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
