@@ -15,7 +15,7 @@ declare module "next-auth" {
   }
 
   interface token {
+    expiresIn: string | unknown;
     id: string;
-    accessToken: string;
   }
 }
