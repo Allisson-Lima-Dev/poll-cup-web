@@ -63,7 +63,7 @@ export function AuthContextProvider({ children }: Component) {
 
   async function signInWithGoogle() {
     signIn("google", {
-      callbackUrl: "http://localhost:3000/home",
+      callbackUrl: "https://poll-cup-web-qn7e.vercel.app/home",
     });
   }
 
