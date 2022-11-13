@@ -11,7 +11,7 @@ export async function authPageProps({ Component, ctx }: any) {
   const api = getAPIClient();
   const FREE_ROUTES = ["/login", "/teste"];
   const {
-    "@PollCupAccess_token": token,
+    "__Secure-next-auth.session-token": token,
     "next-auth.session-token": authToken,
   } = parseCookies(ctx);
 
@@ -23,11 +23,11 @@ export async function authPageProps({ Component, ctx }: any) {
 
   if (FREE_ROUTES.includes(ctx.pathname)) return { pageProps };
 
-  if (!session?.accessToken) {
+  if (!token) {
     redirectTo("/login", { res: ctx.res, status: 301 });
     return {};
   }
-  if (session.accessToken) {
+  if (token) {
     return { pageProps };
   }
 
