@@ -11,12 +11,11 @@ export async function authPageProps({ Component, ctx }: any) {
   const api = getAPIClient();
   const FREE_ROUTES = ["/login", "/teste"];
   const {
-    [process.env.NEXT_PUBLIC_NAME_COOKIE || ""]: token,
+    "__Secure-next-auth.session-token": token,
     "next-auth.session-token": authToken,
   } = parseCookies(ctx);
 
   const session = await getSession(ctx);
-  
 
   if (Component.getInitialProps) {
     pageProps = await Component.getInitialProps(ctx);
