@@ -1,10 +1,10 @@
-import Head from "next/head";
-import Image from "next/image";
-import styles from "../styles/Home.module.css";
+import React from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useAuthContext } from "~/context/AuthContext";
 import { useEffect } from "react";
 import { api } from "~/services/api";
+import { Box, Flex, Text } from "@chakra-ui/react";
+import Router from "next/router";
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -21,13 +21,20 @@ export default function Home() {
     }
     getPolls();
   }, []);
-
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h4>Logado 🚀🚀🥳 {session?.user?.name}</h4>
-        <button onClick={() => signOut()}>Sign out</button>
-      </div>
-    </div>
+    <Box h="full" w="full">
+      <Text>Home</Text>
+      <h4>Logado 🚀🚀🥳 {session?.user?.name}</h4>
+      <button
+        onClick={() => {
+          signOut({
+            callbackUrl: "http://localhost:3000/login",
+            redirect: true,
+          });
+        }}
+      >
+        Sign out
+      </button>
+    </Box>
   );
 }
