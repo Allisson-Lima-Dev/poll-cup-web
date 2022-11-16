@@ -57,11 +57,11 @@ export const authOptions: NextAuthOptions = {
     },
   },
 
-  pages: {
-    signIn: "/login",
-    error: "/login",
-    signOut: "/login",
-  },
+  // pages: {
+  //   signIn: "/login",
+  //   error: "/login",
+  //   signOut: "/login",
+  // },
   session: {
     strategy: "jwt" as SessionStrategy,
     maxAge: 1 * 24 * 60 * 60,
