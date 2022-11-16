@@ -1,7 +1,16 @@
+import axios from "axios";
 import NextAuth, { NextAuthOptions, SessionStrategy } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { parseCookies, setCookie } from "nookies";
+import { api } from "~/services/api";
+
+interface IUserProps {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl: string;
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -12,38 +21,58 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       type: "credentials",
       credentials: {},
-      authorize(credentials, req) {
+      async authorize(credentials, req) {
         const { "next-auth.session-token": authToken } = parseCookies({ req });
         const { email, password } = credentials as {
           email: string;
           password: string;
         };
+        const { data } = await api.post("/signIn", {
+          email,
+          password,
+        });
+
+        setCookie(undefined, "@PollCupAccess_token", data?.token, {
+          maxAge: 1 * 24 * 60 * 60, // 1 day
+          path: "/",
+        });
+
+        const { data: dataUser } = await api.get("/me", {
+          headers: { Authorization: `Bearer ${data?.token || "oi"}` },
+        });
+
+        const { avatarUrl, email: emailUser, sub, name } = dataUser?.user;
+
+        console.log(dataUser);
         // perform you login logic
         // find out user from db
-        if (email !== "john@gmail.com" || password !== "1234") {
+        if (!dataUser) {
           throw new Error("invalid credentials");
         }
 
-        // if everything is fine
-        return {
-          id: "1234",
-          name: "John Doe",
-          email: "john@gmail.com",
-          access_token: authToken,
-        };
+        if (dataUser) {
+          return {
+            id: sub || "123",
+            name: name || "John Doe",
+            email: emailUser || "john@gmail.com",
+            image: avatarUrl || "",
+            access_token: authToken || data?.token,
+          };
+        }
+        return null;
       },
     }),
   ],
   callbacks: {
     async signIn({ user, account }) {
       if (account && user) {
-        account.access_token = user.access_token;
+        account.access_token = user.access_token || account.access_token;
       }
       return true;
     },
     async session({ session, token, user }) {
-      session.user.id = token.id;
-      session.accessToken = token.accessToken;
+      session.user.id = token.id || user.id;
+      session.accessToken = token.accessToken || user.access_token;
       return session;
     },
     async jwt({ token, user, account, profile, isNewUser }) {
@@ -69,7 +98,7 @@ export const authOptions: NextAuthOptions = {
     maxAge: 1 * 24 * 60 * 60,
   },
 
-  secret: "ksfhslkdlfksdf~çlsd",
+  secret: process?.env?.SECRET as string,
 };
 
 export default NextAuth(authOptions);
