@@ -19,7 +19,7 @@ export default function Home() {
     e.preventDefault();
 
     const res = await signIn("credentials", {
-      callbackUrl: "https://poll-cup-web-qn7e.vercel.app/home",
+      callbackUrl: "https://poll-cup-web.vercel.app/home",
       email: userInfo.email,
       password: userInfo.password,
       redirect: true,
