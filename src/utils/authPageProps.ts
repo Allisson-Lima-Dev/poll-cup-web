@@ -8,6 +8,7 @@ import { authOptions } from "~/pages/api/auth/[...nextauth]";
 
 export async function authPageProps({ Component, ctx }: any) {
   let pageProps = {};
+
   const api = getAPIClient();
   const FREE_ROUTES = ["/login", "/teste"];
   const {
@@ -23,11 +24,11 @@ export async function authPageProps({ Component, ctx }: any) {
 
   if (FREE_ROUTES.includes(ctx.pathname)) return { pageProps };
 
-  if (!token) {
+  if (!session?.accessToken) {
     redirectTo("/login", { res: ctx.res, status: 301 });
     return {};
   }
-  if (token) {
+  if (session?.accessToken) {
     return { pageProps };
   }
 
