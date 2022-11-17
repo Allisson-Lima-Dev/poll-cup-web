@@ -8,7 +8,13 @@ import { theme } from "~/styles/theme";
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   return (
-    <SessionProvider refetchOnWindowFocus={true} session={session}>
+    <SessionProvider
+      session={session}
+      // Re-fetch session every 5 minutes
+      refetchInterval={5 * 60}
+      // Re-fetches session when window is focused
+      refetchOnWindowFocus={true}
+    >
       <AuthContextProvider>
         <ChakraProvider theme={theme}>
           <NextNprogress
