@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useSession, signIn } from "next-auth/react";
-import Router from "next/router";
+import Router, { useRouter } from "next/router";
 import { destroyCookie, setCookie } from "nookies";
 import {
   createContext,
@@ -32,12 +32,11 @@ export const AuthContext = createContext({} as AuthContextDataProps);
 export function AuthContextProvider({ children }: Component) {
   const [isUseLoading, setIsUserLoading] = useState(false);
   const [user, setUser] = useState<UserProps | null>(null);
+  const router = useRouter();
 
   const { data: session, status } = useSession();
 
   async function SignInUser() {
-    console.log("entrou");
-
     setIsUserLoading(true);
     try {
       const { data } = await api.post("/users", {
@@ -62,11 +61,42 @@ export function AuthContextProvider({ children }: Component) {
   }
 
   async function signInWithGoogle() {
+    setIsUserLoading(true);
     signIn("google", {
-      // callbackUrl: "http://localhost:3000/home",
-      callbackUrl: "https://poll-cup-web.vercel.app/home",
-      redirect: true,
-    });
+      // callbackUrl: "http://localhost:3000",
+      // callbackUrl: "https://poll-cup-web.vercel.app",
+      redirect: false,
+    })
+      .then((response) => {
+        console.log(response);
+        if (response?.ok) {
+          // Authenticate user
+          console.log("entrou -> /");
+          router.push("/");
+        } else {
+          // setError(response?.error || "");
+          // toast({
+          //   title: "Credencials incorretas",
+          //   status: "error",
+          //   variant: "solid",
+          //   isClosable: true,
+          // });
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        console.log("error -> /");
+        // setError(error.message);
+        // toast({
+        //   title: error.message || "",
+        //   status: "error",
+        //   variant: "solid",
+        //   isClosable: true,
+        // });
+      })
+      .finally(() => {
+        setIsUserLoading(false);
+      });
   }
 
   async function signInCredentials() {
@@ -82,12 +112,12 @@ export function AuthContextProvider({ children }: Component) {
   }
 
   useEffect(() => {
-    if (status === "authenticated") {
+    if (session?.accessToken || status === "authenticated") {
       SignInUser();
       return;
     }
-    status === "unauthenticated" &&
-      destroyCookie(null, "@PollCupAccess_token", { path: "/" });
+
+    destroyCookie(null, "@PollCupAccess_token", { path: "/" });
   }, [status]);
 
   return (
