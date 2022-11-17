@@ -11,10 +11,12 @@ import {
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signIn, signOut, getSession } from "next-auth/react";
 import { useAuthContext } from "~/context/AuthContext";
 import { FormEventHandler, useState } from "react";
 import { Input } from "~/components/input";
+import { useRouter } from "next/router";
+import { GetServerSideProps } from "next";
 
 interface ISignInRequestData {
   email: string;
@@ -22,11 +24,13 @@ interface ISignInRequestData {
 }
 
 const signInFormSchema = yup.object().shape({
-  email: yup.string().email("Email inválido").required("Email Obrigatório"),
+  email: yup.string().required("Email Obrigatório"),
   password: yup.string().required("Senha Obrigatória"),
 });
 
 export default function Login() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const { data: session, status } = useSession();
   const { signInWithGoogle } = useAuthContext();
 
@@ -36,26 +40,47 @@ export default function Login() {
   console.log(session, status);
 
   const toast = useToast();
+  const router = useRouter();
 
   async function handleSignIn(data: ISignInRequestData) {
     const { email, password } = data;
-    try {
-      const res = await signIn("credentials", {
-        // callbackUrl: "http://localhost:3000/home",
-        callbackUrl: "https://poll-cup-web.vercel.app/home",
-        email,
-        password,
-        redirect: true,
+    setLoading(true);
+    signIn("credentials", {
+      // callbackUrl: process.env.NEXTAUTH_URL,
+      callbackUrl: "http://localhost:3000",
+      // callbackUrl: "https://poll-cup-web.vercel.app/home",
+      email,
+      password,
+      redirect: false,
+    })
+      .then((response) => {
+        console.log(response);
+        if (response?.ok) {
+          // Authenticate user
+          router.push("/");
+        } else {
+          setError(response?.error || "");
+          toast({
+            title: "Credencials incorretas",
+            status: "error",
+            variant: "solid",
+            isClosable: true,
+          });
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        setError(error.message);
+        toast({
+          title: error.message || "",
+          status: "error",
+          variant: "solid",
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        setLoading(false);
       });
-    } catch (error) {
-      console.log(error);
-      toast({
-        title: "Credencias incorretas",
-        status: "error",
-        variant: "solid",
-        isClosable: true,
-      });
-    }
   }
 
   return (
@@ -129,7 +154,7 @@ export default function Login() {
       <Box mt="18px">
         <Button
           // ref={ref}
-          // isLoading={loading}
+          isLoading={loading}
           bg="#CBD3E0"
           border="0"
           color="#070A0E"
@@ -156,3 +181,20 @@ export default function Login() {
     </Box>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const session = await getSession(ctx);
+
+  if (session) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {},
+  };
+};
