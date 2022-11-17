@@ -10,6 +10,7 @@ declare module "next-auth" {
       id: string | unknown;
       address: string;
       name: string;
+      image: string;
     };
     accessToken: string | unknown;
   }

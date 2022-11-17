@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { api } from "~/services/api";
 import { Box, Flex, Text } from "@chakra-ui/react";
 import Router from "next/router";
+import { Layout } from "~/components/layout";
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -12,7 +13,7 @@ export default function Home() {
   async function handleLogin() {
     signIn("google");
   }
-  console.log(session, status);
+  // console.log(session, status);
 
   useEffect(() => {
     async function getPolls() {
@@ -23,18 +24,20 @@ export default function Home() {
   }, []);
   return (
     <Box h="full" w="full">
-      <Text>Home</Text>
-      <h4>Logado 🚀🚀🥳 {session?.user?.name}</h4>
-      <button
-        onClick={() => {
-          signOut({
-            callbackUrl: "http://localhost:3000/login",
-            redirect: true,
-          });
-        }}
-      >
-        Sign out
-      </button>
+      <Layout>
+        <Text>Home</Text>
+        <h4>Logado 🚀🚀🥳 {session?.user?.name}</h4>
+        <button
+          onClick={() => {
+            signOut({
+              callbackUrl: "http://localhost:3000/login",
+              redirect: true,
+            });
+          }}
+        >
+          Sign out
+        </button>
+      </Layout>
     </Box>
   );
 }

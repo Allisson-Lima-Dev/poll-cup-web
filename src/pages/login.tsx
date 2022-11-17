@@ -17,6 +17,7 @@ import { FormEventHandler, useState } from "react";
 import { Input } from "~/components/input";
 import { useRouter } from "next/router";
 import { GetServerSideProps } from "next";
+import { Icon } from "@iconify/react";
 
 interface ISignInRequestData {
   email: string;
@@ -32,12 +33,12 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { data: session, status } = useSession();
-  const { signInWithGoogle } = useAuthContext();
+  const { signInWithGoogle, isUseLoading } = useAuthContext();
 
   const { register, handleSubmit, formState } = useForm<ISignInRequestData>({
     resolver: yupResolver(signInFormSchema),
   });
-  console.log(session, status);
+  // console.log(session, status);
 
   const toast = useToast();
   const router = useRouter();
@@ -56,12 +57,11 @@ export default function Login() {
       .then((response) => {
         console.log(response);
         if (response?.ok) {
-          // Authenticate user
           router.push("/");
         } else {
           setError(response?.error || "");
           toast({
-            title: "Credencials incorretas",
+            title: "Credenciais incorretas 😰",
             status: "error",
             variant: "solid",
             isClosable: true,
@@ -86,7 +86,8 @@ export default function Login() {
   return (
     <Box
       pt="60px"
-      w="30%"
+      px={{ base: "20px", lg: "" }}
+      w={{ base: "full", lg: "40%" }}
       mx="auto"
       as="form"
       onSubmit={handleSubmit(handleSignIn)}
@@ -167,6 +168,7 @@ export default function Login() {
         </Button>
         <Box mt="18px"></Box>
         <Button
+          isLoading={isUseLoading}
           bg="#FFF"
           border="1px"
           borderColor="#2E4EFF"
@@ -175,6 +177,11 @@ export default function Login() {
           borderRadius="40px"
           onClick={signInWithGoogle}
         >
+          <Icon
+            icon="logos:google-icon"
+            width={24}
+            style={{ marginRight: 10 }}
+          />
           Entrar com google
         </Button>
       </Box>
